@@ -54,22 +54,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // INITIAL_SESSION or SIGNED_IN
         if (currentSession?.user) {
-          // Fetch profile before revealing the app so tenantId is always ready
+          if (!mounted) return;
+          // ✅ UNBLOCK UI IMMEDIATELY! Don't wait for profile fetch waterfall.
+          setSession(currentSession);
+          setLoading(false);
+
+          // Fetch profile asynchronously in the background
           const { data: profile } = await supabase
             .from('staff_profiles')
             .select('id, full_name, role, tenant_id')
             .eq('id', currentSession.user.id)
             .maybeSingle();
 
-          if (!mounted) return;
-          setSession(currentSession);
-          setStaffProfile(profile ?? null);
+          if (mounted) {
+            setStaffProfile(profile ?? null);
+          }
         } else {
           setSession(null);
           setStaffProfile(null);
+          setLoading(false);
         }
-
-        setLoading(false);
       }
     );
 
