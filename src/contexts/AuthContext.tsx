@@ -30,45 +30,73 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-      if (session?.user) {
-        const { data } = await supabase
-          .from('staff_profiles')
-          .select('id, full_name, role, tenant_id')
-          .eq('id', session.user.id)
-          .maybeSingle();
-        
-        if (!data) {
-          // Auto-create tenant + staff profile on first login
-          const { data: tenant } = await supabase
-            .from('tenants')
-            .insert({ name: session.user.email || 'My Company', slug: session.user.id.slice(0, 8) })
-            .select('id')
-            .single();
+    // Safety timeout to prevent infinite loading
+    const timer = setTimeout(() => {
+      console.warn("Auth initialization timed out, forcing loading to false");
+      setLoading(false);
+    }, 5000);
 
-          if (tenant) {
-            const { data: newProfile } = await supabase
-              .from('staff_profiles')
-              .insert({ id: session.user.id, full_name: session.user.email, role: 'admin', tenant_id: tenant.id })
-              .select('id, full_name, role, tenant_id')
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      try {
+        setSession(session);
+        if (session?.user) {
+          const { data, error } = await supabase
+            .from('staff_profiles')
+            .select('id, full_name, role, tenant_id')
+            .eq('id', session.user.id)
+            .maybeSingle();
+          
+          if (error) throw error;
+
+          if (!data) {
+            // Auto-create tenant + staff profile on first login
+            const { data: tenant, error: tenantError } = await supabase
+              .from('tenants')
+              .insert({ name: session.user.email || 'My Company', slug: session.user.id.slice(0, 8) })
+              .select('id')
               .single();
-            setStaffProfile(newProfile);
+
+            if (tenantError) throw tenantError;
+
+            if (tenant) {
+              const { data: newProfile, error: profileError } = await supabase
+                .from('staff_profiles')
+                .insert({ id: session.user.id, full_name: session.user.email, role: 'admin', tenant_id: tenant.id })
+                .select('id, full_name, role, tenant_id')
+                .single();
+              
+              if (profileError) throw profileError;
+              setStaffProfile(newProfile);
+            }
+          } else {
+            setStaffProfile(data);
           }
         } else {
-          setStaffProfile(data);
+          setStaffProfile(null);
         }
-      } else {
-        setStaffProfile(null);
+      } catch (error) {
+        console.error("Error in auth state change:", error);
+      } finally {
+        setLoading(false);
+        clearTimeout(timer);
       }
-      setLoading(false);
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) setLoading(false);
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error("Error getting session:", error);
+        setLoading(false);
+        clearTimeout(timer);
+      } else if (!session) {
+        setLoading(false);
+        clearTimeout(timer);
+      }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timer);
+    };
   }, []);
 
   const signOut = async () => {
