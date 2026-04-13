@@ -132,6 +132,66 @@ const faqs = [
     question: 'Can someone else drive the car while I’m renting it?',
     answer: "Yes, but they must be added to the rental agreement as an additional driver. We’ll need their passport and driving license just like yours. If an unregistered person drives the car, the insurance will be void if anything happens.",
     sort_order: 210
+  },
+  {
+    category: 'Fleet & Pricing',
+    question: 'What is your general daily rental price range?',
+    answer: 'Our daily rental prices currently start from AED 119 for models like the Toyota Yaris and Hyundai i10 Grand, and go up to AED 1,999 for premium models like the Range Rover Vogue, Mercedes-Benz SL Convertible, and Porsche 911.',
+    sort_order: 220
+  },
+  {
+    category: 'Fleet & Pricing',
+    question: 'What is your general monthly rental price range?',
+    answer: 'Our monthly rental prices currently start from AED 2,199 for models like the MG ZS and Hyundai i10 Grand, and go up to AED 32,000 for the Mercedes-Benz G63.',
+    sort_order: 230
+  },
+  {
+    category: 'Fleet & Pricing',
+    question: 'What are your most budget-friendly rental cars?',
+    answer: 'Some of our most budget-friendly options include the Toyota Yaris and Hyundai i10 Grand from AED 119/day and AED 699/week. For monthly rentals, options like the MG ZS and Hyundai i10 Grand start from AED 2,199/month.',
+    sort_order: 240
+  },
+  {
+    category: 'Fleet & Pricing',
+    question: 'Do you have affordable SUVs?',
+    answer: 'Yes. Affordable SUV options include the GAC GS3 from AED 149/day, Hyundai Creta from AED 179/day, Chevrolet Captiva from AED 199/day, and Toyota Fortuner from AED 229/day. Their monthly prices range from AED 2,990 to AED 5,999 depending on the model.',
+    sort_order: 250
+  },
+  {
+    category: 'Fleet & Pricing',
+    question: 'Do you offer 7-seater cars, and what are the prices?',
+    answer: 'Yes. Our 7-seater options include Chevrolet Captiva from AED 199/day, Toyota Fortuner from AED 229/day, Chevrolet Tahoe from AED 599/day, Nissan Patrol from AED 590/day, Mercedes-Benz GLS 450 from AED 899/day, and Cadillac Escalade from AED 1,199/day. Monthly options include Captiva from AED 2,990, Fortuner from AED 5,999, Tahoe from AED 10,999, and Patrol from AED 13,990.',
+    sort_order: 260
+  },
+  {
+    category: 'Fleet & Pricing',
+    question: 'What sports or fun-to-drive cars do you have?',
+    answer: 'Sportier options on our list include the Mini Cooper from AED 299/day or AED 4,990/month, the Dodge Charger from AED 349/day or AED 5,499/month, the Mercedes-Benz SL Convertible from AED 1,999/day, and the Porsche 911 from AED 1,999/day.',
+    sort_order: 270
+  },
+  {
+    category: 'Fleet & Pricing',
+    question: 'Do you offer luxury Mercedes models?',
+    answer: 'Yes. Our listed Mercedes models include the C Class, GLB, GLE, GLS 450, S Class, G63, and SL Convertible. Prices start from AED 399/day for the GLB and go up to AED 1,999/day for the SL Convertible. Monthly Mercedes options range from AED 5,999 for the GLB to AED 32,000 for the G63.',
+    sort_order: 280
+  },
+  {
+    category: 'Fleet & Pricing',
+    question: 'What are your premium or special cars?',
+    answer: 'Some of our standout premium models include the Range Rover Vogue at AED 1,999/day, Mercedes-Benz G63 at AED 1,699/day or AED 32,000/month, Porsche 911 at AED 1,999/day, Mercedes-Benz SL Convertible at AED 1,999/day, and Cadillac Escalade at AED 1,199/day.',
+    sort_order: 290
+  },
+  {
+    category: 'Fleet & Pricing',
+    question: 'What is a good mid-range premium option?',
+    answer: 'If you want something premium without going into ultra-luxury pricing, good options include the Audi A6 from AED 349/day or AED 5,990/month, Mercedes-Benz GLB from AED 399/day or AED 5,999/month, Mini Cooper from AED 299/day or AED 4,990/month, and Hyundai Santafe from AED 299/day or AED 6,499/month.',
+    sort_order: 300
+  },
+  {
+    category: 'Fleet & Pricing',
+    question: 'Do you have unique brands or models that are not very common everywhere?',
+    answer: 'Yes. Besides popular brands like Toyota, Hyundai, and Nissan, our list also includes models like the Jetour T2, Citroen C3, Opel Crossland, MG ZS, GAC GS3, and Mini Cooper. Prices for these models range from AED 149/day up to AED 399/day, with monthly options starting from AED 2,199.',
+    sort_order: 310
   }
 ];
 

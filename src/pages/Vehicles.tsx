@@ -55,9 +55,16 @@ export default function Vehicles() {
     setIsSaving(true);
     try {
       const results = await Promise.all(
-        editEntries.map(([id, prices]) => 
-          supabase.from('vehicles').update(prices).eq('id', id)
-        )
+        editEntries.map(([id, prices]) => {
+          const vehicle = vehicles.find(v => v.id === id);
+          return supabase.from('vehicles')
+            .update({
+              ...prices,
+              plate_number: vehicle?.plate_number,
+              tenant_id: tenantId
+            })
+            .eq('id', id);
+        })
       );
 
       const error = results.find(r => r.error)?.error;
