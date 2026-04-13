@@ -46,36 +46,46 @@ export default function Vehicles() {
   };
 
   const handleSave = async () => {
-    const updates = Object.entries(editedPrices).map(([id, prices]) => ({
-      id,
-      tenant_id: tenantId,
-      ...prices,
-    }));
-
-    if (updates.length === 0) {
+    const editEntries = Object.entries(editedPrices);
+    if (editEntries.length === 0) {
       setIsEditing(false);
       return;
     }
 
     setIsSaving(true);
-    const { error } = await supabase.from('vehicles').upsert(updates);
-    
-    if (error) {
+    try {
+      const results = await Promise.all(
+        editEntries.map(([id, prices]) => 
+          supabase.from('vehicles').update(prices).eq('id', id)
+        )
+      );
+
+      const error = results.find(r => r.error)?.error;
+      
+      if (error) {
+        toast({
+          title: 'Error saving prices',
+          description: error.message,
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Prices updated',
+          description: `Successfully updated ${editEntries.length} vehicles.`,
+        });
+        await load();
+        setEditedPrices({});
+        setIsEditing(false);
+      }
+    } catch (err: any) {
       toast({
-        title: 'Error saving prices',
-        description: error.message,
+        title: 'Unexpected error',
+        description: err.message,
         variant: 'destructive',
       });
-    } else {
-      toast({
-        title: 'Prices updated',
-        description: `Successfully updated ${updates.length} vehicles.`,
-      });
-      await load();
-      setEditedPrices({});
-      setIsEditing(false);
+    } finally {
+      setIsSaving(false);
     }
-    setIsSaving(false);
   };
 
   const cancelEdit = () => {
