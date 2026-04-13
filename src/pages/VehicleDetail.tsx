@@ -87,7 +87,12 @@ export default function VehicleDetail() {
             <p><strong>Location:</strong> {vehicle.current_location || '—'}</p>
             <p><strong>Odometer:</strong> {vehicle.odometer || '—'}</p>
             <p><strong>Chassis:</strong> {vehicle.chassis_number || '—'}</p>
-            <div className="flex items-center gap-2">
+            <div className="pt-2 mt-2 border-t">
+              <p><strong>Daily Price:</strong> {vehicle.daily_price ? `${vehicle.daily_price.toLocaleString()} AED` : '—'}</p>
+              <p><strong>Weekly Price:</strong> {vehicle.weekly_price ? `${vehicle.weekly_price.toLocaleString()} AED` : '—'}</p>
+              <p><strong>Monthly Price:</strong> {vehicle.monthly_price ? `${vehicle.monthly_price.toLocaleString()} AED` : '—'}</p>
+            </div>
+            <div className="flex items-center gap-2 pt-2">
               <strong>Status:</strong>
               <Select value={vehicle.status} onValueChange={v => updateVehicle({ status: v })}>
                 <SelectTrigger className="w-36 h-8"><SelectValue /></SelectTrigger>

@@ -58,6 +58,9 @@ export default function Vehicles() {
             <TableHead>Model</TableHead>
             <TableHead>Year</TableHead>
             <TableHead>Color</TableHead>
+            <TableHead>Daily</TableHead>
+            <TableHead>Weekly</TableHead>
+            <TableHead>Monthly</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Location</TableHead>
           </TableRow>
@@ -70,12 +73,15 @@ export default function Vehicles() {
               <TableCell>{v.model}</TableCell>
               <TableCell>{v.year || '—'}</TableCell>
               <TableCell>{v.color || '—'}</TableCell>
+              <TableCell className="font-medium">{v.daily_price ? `${v.daily_price.toLocaleString()} AED` : '—'}</TableCell>
+              <TableCell className="font-medium">{v.weekly_price ? `${v.weekly_price.toLocaleString()} AED` : '—'}</TableCell>
+              <TableCell className="font-medium">{v.monthly_price ? `${v.monthly_price.toLocaleString()} AED` : '—'}</TableCell>
               <TableCell><Badge variant={v.status === 'available' ? 'default' : 'secondary'}>{v.status}</Badge></TableCell>
               <TableCell>{v.current_location || '—'}</TableCell>
             </TableRow>
           ))}
           {filtered.length === 0 && (
-            <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground">No vehicles found</TableCell></TableRow>
+            <TableRow><TableCell colSpan={10} className="text-center text-muted-foreground">No vehicles found</TableCell></TableRow>
           )}
         </TableBody>
       </Table>
