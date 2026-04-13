@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useTenantId } from '@/hooks/useTenantId';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -18,6 +19,7 @@ export default function Vehicles() {
   const [editedPrices, setEditedPrices] = useState<Record<string, any>>({});
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const tenantId = useTenantId();
   const navigate = useNavigate();
 
   const load = async () => {
@@ -46,6 +48,7 @@ export default function Vehicles() {
   const handleSave = async () => {
     const updates = Object.entries(editedPrices).map(([id, prices]) => ({
       id,
+      tenant_id: tenantId,
       ...prices,
     }));
 
