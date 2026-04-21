@@ -46,7 +46,8 @@ export default function Leads() {
         .from('leads')
         .select(`
           *,
-          messages(message_text, created_at)
+          messages(message_text, created_at),
+          conversation_states(collected_fields)
         `)
         .order('updated_at', { ascending: false });
       
@@ -143,7 +144,8 @@ export default function Leads() {
             <TableRow className="bg-muted/30 border-b">
               <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground">Lead & Channel</TableHead>
               <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground text-center w-[120px]">Messages</TableHead>
-              <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground w-[200px]">Path</TableHead>
+              <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground w-[150px]">Path</TableHead>
+              <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground">Collected Data</TableHead>
               <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground text-center">Status</TableHead>
               <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground">First Msg</TableHead>
               <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground text-right">Last Msg</TableHead>
@@ -194,6 +196,31 @@ export default function Leads() {
                         <span className="text-[9px] font-black leading-none">{p}%</span>
                       </div>
                       <Progress value={p} className="h-1" indicatorClassName={cn(c, "opacity-90")} />
+                    </div>
+                  </TableCell>
+
+                  <TableCell className="py-4 px-6">
+                    <div className="flex flex-wrap gap-1 max-w-[250px]">
+                      {(() => {
+                        try {
+                          const state = l.conversation_states;
+                          const rawFields = Array.isArray(state) ? state[0]?.collected_fields : state?.collected_fields;
+                          if (!rawFields) return <span className="text-[10px] text-muted-foreground italic">No data</span>;
+                          
+                          const fields = typeof rawFields === 'string' ? JSON.parse(rawFields) : rawFields;
+                          const entries = Object.entries(fields).filter(([_, v]) => v !== null && v !== '');
+                          
+                          if (entries.length === 0) return <span className="text-[10px] text-muted-foreground italic">No data</span>;
+                          
+                          return entries.map(([k, v]) => (
+                            <Badge key={k} variant="outline" className="text-[9px] px-1 py-0 bg-muted/30 border-muted-foreground/20 text-muted-foreground capitalize">
+                              {k.replace(/_/g, ' ')}: {String(v)}
+                            </Badge>
+                          ));
+                        } catch (e) {
+                          return <span className="text-[10px] text-rose-500 italic">Error parsing</span>;
+                        }
+                      })()}
                     </div>
                   </TableCell>
 
