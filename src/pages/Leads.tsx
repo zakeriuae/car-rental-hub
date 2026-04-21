@@ -178,7 +178,7 @@ export default function Leads() {
             <TableRow className="bg-muted/30 border-b">
               <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground">Lead & Channel</TableHead>
               <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground text-center w-[120px]">Messages</TableHead>
-              <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground w-[150px]">Path</TableHead>
+              <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground w-[250px]">Path</TableHead>
               <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground">Collected Data</TableHead>
               <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground text-center">Status</TableHead>
               <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground">First Msg</TableHead>
@@ -229,7 +229,7 @@ export default function Leads() {
                         </span>
                         <span className="text-[9px] font-black leading-none">{p}%</span>
                       </div>
-                      <Progress value={p} className="h-1" indicatorClassName={cn(c, "opacity-90")} />
+                      <Progress value={p} className="h-2.5" indicatorClassName={cn(c, "opacity-90")} />
                     </div>
                   </TableCell>
 
