@@ -10,7 +10,8 @@ import { Progress } from '@/components/ui/progress';
 import { LEAD_STATUSES, CHATBOT_STAGES } from '@/lib/constants';
 import { 
   MessageSquare, Calendar, Milestone, MessageCircle, Send, 
-  Car, Clock, MapPin, User, Phone, Languages 
+  Car, Clock, MapPin, User, Phone, Languages,
+  ArrowDownLeft, ArrowUpRight
 } from 'lucide-react';
 
 const calculateDynamicProgress = (lead: any) => {
@@ -80,7 +81,7 @@ export default function Leads() {
         .from('leads')
         .select(`
           *,
-          messages(message_text, created_at),
+          messages(message_text, created_at, direction),
           conversation_states(collected_fields)
         `)
         .order('updated_at', { ascending: false });
@@ -96,10 +97,15 @@ export default function Leads() {
         const sortedMsgs = (l.messages || []).sort((a: any, b: any) => 
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
+        const inboundCount = (l.messages || []).filter((m: any) => m.direction === 'inbound').length;
+        const outboundCount = (l.messages || []).filter((m: any) => m.direction === 'outbound').length;
+        
         return {
           ...l,
           latest_msg: sortedMsgs[0] || null,
-          message_count: l.messages?.length || 0
+          message_count: l.messages?.length || 0,
+          inbound_count: inboundCount,
+          outbound_count: outboundCount
         };
       });
       
@@ -177,7 +183,7 @@ export default function Leads() {
           <TableHeader>
             <TableRow className="bg-muted/30 border-b">
               <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground">Lead & Channel</TableHead>
-              <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground text-center w-[120px]">Messages</TableHead>
+              <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground text-center w-[160px]">Messages</TableHead>
               <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground w-[250px]">Path</TableHead>
               <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground">Collected Data</TableHead>
               <TableHead className="py-3 px-6 text-xs uppercase tracking-wider font-semibold text-muted-foreground text-center">Status</TableHead>
@@ -216,9 +222,20 @@ export default function Leads() {
                   </TableCell>
                   
                   <TableCell className="py-4 px-6 text-center">
-                    <Badge variant="secondary" className="font-mono font-bold text-xs px-2 py-0">
-                      {l.message_count}
-                    </Badge>
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="flex items-center gap-1.5">
+                        <ArrowDownLeft className="h-3 w-3 text-slate-500" />
+                        <Badge variant="secondary" className="font-mono font-bold text-[10px] px-1.5 py-0 min-w-[24px]">
+                          {l.inbound_count}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <ArrowUpRight className="h-3 w-3 text-emerald-500" />
+                        <Badge variant="outline" className="font-mono font-bold text-[10px] px-1.5 py-0 min-w-[24px] border-emerald-100 bg-emerald-50/30 text-emerald-700">
+                          {l.outbound_count}
+                        </Badge>
+                      </div>
+                    </div>
                   </TableCell>
 
                   <TableCell className="py-4 px-6">
