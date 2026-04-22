@@ -13,23 +13,55 @@ export default function Documents() {
   const [filter, setFilter] = useState('all');
   const { toast } = useToast();
 
-  const load = async () => {
-    let q = supabase.from('customer_documents').select('*, leads(full_name, whatsapp_number)').order('created_at', { ascending: false });
-    if (filter !== 'all') q = q.eq('verification_status', filter);
-    const { data } = await q;
-    const items = data || [];
-    setDocs(items);
+  const isImage = (doc: any) => {
+    if (doc.mime_type?.startsWith('image/')) return true;
+    const ext = doc.file_name?.split('.').pop()?.toLowerCase();
+    return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic'].includes(ext || '');
+  };
 
-    if (items.length > 0) {
-      const paths = items.map(d => d.storage_path);
-      const { data: signedData } = await supabase.storage.from('customer-documents').createSignedUrls(paths, 3600);
-      if (signedData) {
-        const urls: Record<string, string> = {};
-        signedData.forEach((sd: any) => {
-          if (sd.signedUrl) urls[sd.path] = sd.signedUrl;
-        });
-        setSignedUrls(urls);
+  const load = async () => {
+    try {
+      let q = supabase.from('customer_documents').select('*, leads(full_name, whatsapp_number)').order('created_at', { ascending: false });
+      if (filter !== 'all') q = q.eq('verification_status', filter);
+      const { data, error } = await q;
+      
+      if (error) throw error;
+      
+      const items = data || [];
+      setDocs(items);
+
+      if (items.length > 0) {
+        // Group by bucket to handle multiple storage locations
+        const buckets = Array.from(new Set(items.map(i => i.storage_bucket || 'customer-documents')));
+        const allUrls: Record<string, string> = {};
+
+        for (const bucket of buckets) {
+          const bucketItems = items.filter(i => (i.storage_bucket || 'customer-documents') === bucket);
+          const paths = bucketItems.map(d => d.storage_path);
+          
+          const { data: signedData, error: sError } = await supabase.storage.from(bucket).createSignedUrls(paths, 3600);
+          
+          if (sError) {
+            console.error(`Error fetching signed URLs for bucket ${bucket}:`, sError.message);
+            continue;
+          }
+
+          if (signedData) {
+            signedData.forEach((sd: any) => {
+              if (sd.signedUrl) {
+                allUrls[sd.path] = sd.signedUrl;
+                // Also store without leading slash if present, for easier lookup
+                const cleanPath = sd.path.startsWith('/') ? sd.path.substring(1) : sd.path;
+                allUrls[cleanPath] = sd.signedUrl;
+              }
+            });
+          }
+        }
+        setSignedUrls(allUrls);
       }
+    } catch (err: any) {
+      console.error('Error loading documents:', err.message);
+      toast({ title: 'Error loading documents', variant: 'destructive' });
     }
   };
 
@@ -42,13 +74,24 @@ export default function Documents() {
   };
 
   const getDocUrl = async (doc: any) => {
+    const path = doc.storage_path;
+    const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+    
     // If we already have a signed URL from batch loading, use it
-    if (signedUrls[doc.storage_path]) {
-      window.open(signedUrls[doc.storage_path], '_blank');
+    if (signedUrls[path] || signedUrls[cleanPath]) {
+      window.open(signedUrls[path] || signedUrls[cleanPath], '_blank');
       return;
     }
-    const { data } = await supabase.storage.from(doc.storage_bucket).createSignedUrl(doc.storage_path, 3600);
-    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+    
+    try {
+      const bucket = doc.storage_bucket || 'customer-documents';
+      const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, 3600);
+      if (error) throw error;
+      if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+    } catch (err: any) {
+      console.error('Error opening document:', err.message);
+      toast({ title: 'Could not open document', variant: 'destructive' });
+    }
   };
 
   return (
@@ -79,16 +122,20 @@ export default function Documents() {
                   className="w-12 h-12 rounded-lg border bg-muted/50 overflow-hidden flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-primary transition-all group relative"
                   onClick={() => getDocUrl(d)}
                 >
-                  {signedUrls[d.storage_path] && d.mime_type?.startsWith('image/') ? (
-                    <img src={signedUrls[d.storage_path]} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                  {isImage(d) && (signedUrls[d.storage_path] || signedUrls[d.storage_path.startsWith('/') ? d.storage_path.substring(1) : d.storage_path]) ? (
+                    <img 
+                      src={signedUrls[d.storage_path] || signedUrls[d.storage_path.startsWith('/') ? d.storage_path.substring(1) : d.storage_path]} 
+                      alt="" 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform" 
+                    />
                   ) : (
                     <div className="text-muted-foreground group-hover:text-primary transition-colors">
-                      {d.mime_type?.includes('pdf') ? <FileText className="w-6 h-6" /> : 
-                       d.mime_type?.includes('zip') || d.mime_type?.includes('rar') ? <FileArchive className="w-6 h-6" /> :
+                      {d.mime_type?.includes('pdf') || d.file_name?.toLowerCase().endsWith('.pdf') ? <FileText className="w-6 h-6" /> : 
+                       d.mime_type?.includes('zip') || d.file_name?.toLowerCase().match(/\.(zip|rar|7z)$/) ? <FileArchive className="w-6 h-6" /> :
                        <ImageIcon className="w-6 h-6" />}
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                  <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                     <Eye className="w-5 h-5 text-white" />
                   </div>
                 </div>
