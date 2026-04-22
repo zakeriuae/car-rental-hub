@@ -61,7 +61,7 @@ export default function Documents() {
 
         for (const bucket of buckets) {
           const bucketItems = items.filter(i => (i.storage_bucket || 'customer-documents') === bucket);
-          const paths = bucketItems.map(d => d.storage_path);
+          const paths = bucketItems.map(d => sanitizePath(d.storage_path, bucket));
           
           const { data: signedData, error: sError } = await supabase.storage.from(bucket).createSignedUrls(paths, 3600);
           
