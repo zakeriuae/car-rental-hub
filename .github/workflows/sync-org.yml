@@ -19,4 +19,4 @@ jobs:
       - name: Push mirror to org
         run: |
           git remote add org https://x-access-token:${{ secrets.ORG_SYNC_TOKEN }}@github.com/DrivexGit/car-rental-hub.git
-          git push --force org main
+          git push --force --verbose org main
