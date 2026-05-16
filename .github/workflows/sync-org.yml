@@ -1,0 +1,22 @@
+name: Sync to Org Repo
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push mirror to org
+        run: |
+          git remote add org https://x-access-token:${{ secrets.ORG_SYNC_TOKEN }}@github.com/DrivexGit/car-rental-hub.git
+          git push --force org main
